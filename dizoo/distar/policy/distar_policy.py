@@ -28,7 +28,7 @@ class DIStarPolicy(Policy):
     config = dict(
         type='distar',
         on_policy=False,
-        cuda=True,
+        cuda=False,
         learning_rate=1e-5,
         model=dict(),
         # learn
@@ -120,7 +120,7 @@ class DIStarPolicy(Policy):
         clip_bo=False,  # clip the length of teacher's building order to agent's length
         z_path='7map_filter_spine.json',
         realtime=False,  #TODO(zms): set from env, need to use only one cfg define policy and env
-        model_path='sl_model.pth',
+        model_path='rl_model.pth',
         teacher_model_path='sl_model.pth',
     )
 
