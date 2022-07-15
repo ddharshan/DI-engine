@@ -28,7 +28,7 @@ class DIStarPolicy(Policy):
     config = dict(
         type='distar',
         on_policy=False,
-        cuda=True,
+        cuda=False,
         learning_rate=1e-5,
         model=dict(),
         # learn
@@ -332,6 +332,7 @@ class DIStarPolicy(Policy):
         total_kl_loss *= self.loss_weights.kl
         action_type_kl_loss *= self.loss_weights.action_type_kl
         loss_info_dict.update(kl_loss_dict)
+        print('total_kl_loss',total_kl_loss)
 
         # ======
         # update

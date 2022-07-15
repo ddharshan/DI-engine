@@ -14,6 +14,7 @@ from ding.league.v2 import BaseLeague
 from dizoo.distar.config import distar_cfg
 from dizoo.distar.envs.distar_env import DIStarEnv
 from unittest.mock import patch
+from dizoo.distar.policy.distar_policy import DIStarPolicy
 
 env_cfg = dict(
     actor=dict(job_type='train', ),
@@ -60,12 +61,12 @@ class PrepareTest():
 
     @classmethod
     def policy_fn(cls):
-        policy = DIStarMockPolicy(DIStarMockPolicy.default_config(), enable_field=['learn'])
+        policy = DIStarPolicy(DIStarPolicy.default_config(), enable_field=['learn'])
         return policy
 
     @classmethod
     def collect_policy_fn(cls):
-        policy = DIStarMockPolicy(DIStarMockPolicy.default_config(), enable_field=['collect'])
+        policy = DIStarPolicy(DIStarPolicy.default_config(), enable_field=['collect'])
         return policy
 
 
@@ -100,8 +101,8 @@ def main():
 
 @pytest.mark.unittest
 def test_league_pipeline():
-    Parallel.runner(n_parallel_workers=7, protocol="tcp", topology="mesh")(main)
+    Parallel.runner(n_parallel_workers=5, protocol="tcp", topology="mesh")(main)
 
 
 if __name__ == "__main__":
-    Parallel.runner(n_parallel_workers=7, protocol="tcp", topology="mesh")(main)
+    Parallel.runner(n_parallel_workers=5, protocol="tcp", topology="mesh")(main)

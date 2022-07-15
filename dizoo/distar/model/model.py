@@ -130,10 +130,13 @@ class Model(nn.Module):
         policy_map_skip = [map[:-batch_size] for map in map_skip]
         policy_scalar_context = scalar_context[:-batch_size]
         policy_entity_num = entity_num[:-batch_size]
-        _, _, logits = self.policy.train_forward(
-            policy_lstm_input, policy_entity_embeddings, policy_map_skip, policy_scalar_context, policy_entity_num,
-            flat_action_info, flat_selected_units_num
-        )
+
+        self.policy.eval()
+        with torch.no_grad():
+            _, _, logits = self.policy.train_forward(
+                policy_lstm_input, policy_entity_embeddings, policy_map_skip, policy_scalar_context, policy_entity_num,
+                flat_action_info, flat_selected_units_num
+            )
 
         # logits['selected_units'] = logits['selected_units'].mean(dim=1)
         critic_input = lstm_output.squeeze(0)
