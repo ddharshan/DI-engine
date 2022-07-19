@@ -111,6 +111,7 @@ class BattleStepCollector:
             if self.env.closed:
                 self.env.launch()
                 # TODO(zms): only runnable when 1 actor has exactly one env, need to write more general
+                print('actor {} run closed env!'.format(task.router.node_id))
                 for policy_id, policy in enumerate(ctx.current_policies):
                     policy.reset(self.env.ready_obs[0][policy_id])
             self._update_policies(ctx.player_id_list)

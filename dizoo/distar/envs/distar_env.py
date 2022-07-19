@@ -27,7 +27,7 @@ from .meta import MAX_DELAY, MAX_SELECTED_UNITS_NUM, DEFAULT_SPATIAL_SIZE, MAX_E
 from .static_data import ACTIONS_STAT, RACE_DICT, UNIT_TYPES_REORDER_ARRAY, UPGRADES_REORDER_ARRAY, \
     CUMULATIVE_STAT_ACTIONS, UNIT_ABILITY_REORDER, ABILITY_TO_QUEUE_ACTION, BUFFS_REORDER_ARRAY, \
     ADDON_REORDER_ARRAY
-
+from ding.framework import task
 
 class DIStarEnv(SC2Env, BaseEnv):
 
@@ -42,6 +42,8 @@ class DIStarEnv(SC2Env, BaseEnv):
             map_size = game_info[policy_id].start_raw.map_size
             policy_obs['map_name'] = map_name
             policy_obs['map_size'] = map_size
+        
+        print('actor {} reset policy ids: {}'.format(task.router.node_id, observations.keys()))
 
         return observations
 

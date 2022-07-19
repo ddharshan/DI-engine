@@ -182,8 +182,11 @@ class DIStarPolicy(Policy):
         # =============
         # create loss show dict
         loss_info_dict = {}
+
         with self.timer:
-            model_output = self._learn_model.rl_learn_forward(**inputs)
+            self._learn_model.eval()
+            with torch.no_grad():
+                model_output = self._learn_model.rl_learn_forward(**inputs)
         loss_info_dict['model_forward_time'] = self.timer.value
 
         # ===========
@@ -333,6 +336,7 @@ class DIStarPolicy(Policy):
         action_type_kl_loss *= self.loss_weights.action_type_kl
         loss_info_dict.update(kl_loss_dict)
         print('total_kl_loss',total_kl_loss)
+        print('kl_loss_dict',kl_loss_dict)
 
         # ======
         # update
@@ -341,17 +345,17 @@ class DIStarPolicy(Policy):
             total_vtrace_loss + total_upgo_loss + total_critic_loss + total_entropy_loss + total_kl_loss +
             action_type_kl_loss
         )
-        with self.timer:
-            self.optimizer.zero_grad()
-            total_loss.backward()
-            if self._cfg.learn.multi_gpu:
-                self.sync_gradients()
-            gradient = torch.nn.utils.clip_grad_norm_(self._learn_model.parameters(), self._cfg.grad_clip.threshold, 2)
-            self.optimizer.step()
+        # with self.timer:
+        #     self.optimizer.zero_grad()
+        #     total_loss.backward()
+        #     if self._cfg.learn.multi_gpu:
+        #         self.sync_gradients()
+        #     gradient = torch.nn.utils.clip_grad_norm_(self._learn_model.parameters(), self._cfg.grad_clip.threshold, 2)
+        #     self.optimizer.step()
 
-        loss_info_dict['backward_time'] = self.timer.value
+        # loss_info_dict['backward_time'] = self.timer.value
         loss_info_dict['total_loss'] = total_loss
-        loss_info_dict['gradient'] = gradient
+        # loss_info_dict['gradient'] = gradient
         return loss_info_dict
 
     def _monitor_var_learn(self):
@@ -556,9 +560,12 @@ class DIStarPolicy(Policy):
 
     def _data_postprocess_collect(self, data, game_info):
         self.hidden_state = data['hidden_state']
-        self.last_queued = data['action_info']['queued']
-        self.last_action_type = data['action_info']['action_type']
-        self.last_delay = data['action_info']['delay']
+        assert data['action_info']['queued'].shape == torch.Size([1]), data['action_info']['queued']
+        self.last_queued = data['action_info']['queued'][0]
+        assert data['action_info']['action_type'].shape == torch.Size([1]), data['action_info']['action_type']
+        self.last_action_type = data['action_info']['action_type'][0]
+        assert data['action_info']['action_type'].shape == torch.Size([1]), data['action_info']['delay']
+        self.last_delay = data['action_info']['delay'][0]
         self.last_location = data['action_info']['target_location']
 
         action_type = self.last_action_type.item()
@@ -679,6 +686,8 @@ class DIStarPolicy(Policy):
                 'winloss': torch.tensor(reward, dtype=torch.float),
                 'build_order': bo_reward,
                 'built_unit': cum_reward,
+                'effect': torch.randint(-1, 1, size=(), dtype=torch.float),
+                'upgrade': torch.randint(-1, 1, size=(), dtype=torch.float),
                 # 'upgrade': torch.randint(-1, 1, size=(), dtype=torch.float),
                 'battle': battle_reward,
             },

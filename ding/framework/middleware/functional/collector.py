@@ -337,6 +337,7 @@ def battle_inferencer_for_distar(cfg: EasyDict, env: BaseEnvManager):
             observations = obs[env_id]
             inference_output[env_id] = {}
             actions[env_id] = {}
+            print('actor {}, policy {} will forward'.format(task.router.node_id, observations.keys()))
             for policy_id, policy_obs in observations.items():
                 # policy.forward
                 output = ctx.current_policies[policy_id].forward(policy_obs)
@@ -369,6 +370,7 @@ def battle_rolloutor_for_distar(cfg: EasyDict, env: BaseEnvManager, transitions_
                 # 1st case when env step has bug and need to reset.
 
                 # TODO(zms): if it is first step of the episode, do not delete the last episode in the TransitionList
+                print('actor {} have abnormal step here! and we will reset our policy and env'.format(task.router.node_id))
                 for policy_id, policy in enumerate(ctx.current_policies):
                     transitions_list[policy_id].clear_newest_episode(env_id, before_append=True)
                     policy.reset(env.ready_obs[0][policy_id])
@@ -383,7 +385,16 @@ def battle_rolloutor_for_distar(cfg: EasyDict, env: BaseEnvManager, transitions_
                         done=timestep.done,
                         info=timestep.info[policy_id]
                     )
-                    transition = policy.process_transition(obs=None, model_output=None, timestep=policy_timestep)
+                    try:
+                        transition = policy.process_transition(obs=None, model_output=None, timestep=policy_timestep)
+                    except Exception as e:
+                        print('-----------------------')
+                        print('actor: {}, policy {} process_transition has bug'.format(task.router.node_id, policy_id))
+                        print(e)
+                        print(timestep.info)
+                        print(timestep.done)
+                        print('-----------------------')
+                        exit(0)
                     transition = EasyDict(transition)
                     transition.collect_train_iter = ttorch.as_tensor(
                         [model_info_dict[ctx.player_id_list[policy_id]].update_train_iter]
@@ -392,7 +403,9 @@ def battle_rolloutor_for_distar(cfg: EasyDict, env: BaseEnvManager, transitions_
                     # 2nd case when the number of transitions in one of all the episodes is shorter than unroll_len
                     episode_long_enough = episode_long_enough and transitions_list[policy_id].append(env_id, transition)
 
-                if timestep.done:
+            if timestep.done:
+                for policy_id, policy in enumerate(ctx.current_policies):
+                    print('timestep.done so we reset the policy! actor{}, policy id: {}'.format(task.router.node_id, policy_id))
                     policy.reset(env.ready_obs[0][policy_id])
                     ctx.episode_info[policy_id].append(timestep.info[policy_id])
 
