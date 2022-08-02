@@ -37,7 +37,7 @@ class DIStarPolicy(Policy):
         learning_rate=1e-5,
         model=dict(),
         # learn
-        learn=dict(multi_gpu=False, ),
+        learn=dict(multi_gpu=True, ),
         loss_weights=dict(
             baseline=dict(
                 winloss=10.0,

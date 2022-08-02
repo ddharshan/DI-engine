@@ -47,7 +47,7 @@ distar_cfg = EasyDict(
                     },
                     'cfg_type': 'BaseLearnerDict'
                 },
-                'multi_gpu': False,
+                'multi_gpu': True,
                 'epoch_per_collect': 10,
                 'batch_size': 6,
                 'learning_rate': 1e-05,
