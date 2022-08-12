@@ -23,7 +23,7 @@ gym_hybrid_hppo_config = dict(
                 action_args_shape=2,
             ),
             action_space='hybrid',
-            encoder_hidden_size_list=[256, 128, 64, 64],
+            #encoder_hidden_size_list=[256, 128, 64, 64],
             sigma_type='fixed',
             fixed_sigma_value=0.3,
             bound_type='tanh',
