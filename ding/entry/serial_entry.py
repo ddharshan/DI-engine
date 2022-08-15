@@ -126,6 +126,7 @@ def serial_pipeline(
             'env_step': collector.envstep,
             'train_iter': learner.train_iter,
             'eval_value': np.mean(eval_value_raw),
+             print(eval_value_raw),
             'eval_value_raw': eval_value_raw,
             'finish_time': time.ctime(),
         }
